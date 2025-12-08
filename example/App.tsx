@@ -1,6 +1,7 @@
 import React from "react";
-import { StyleSheet, View, Text, SafeAreaView } from "react-native";
-import { ModernTable, useTable, Column, Density } from "expo-smart-table";
+import { StyleSheet, View, Text } from "react-native";
+import { ModernTable, useTable, Column } from "expo-smart-table";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Mock Data Type
 interface User {

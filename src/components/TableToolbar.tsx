@@ -9,7 +9,16 @@ import {
   ScrollView,
   Switch,
 } from "react-native";
-import { Search, SlidersHorizontal, Eye, X, Pin } from "lucide-react-native";
+import {
+  Search,
+  SlidersHorizontal,
+  Eye,
+  X,
+  Pin,
+  Maximize2,
+  Minimize2,
+} from "lucide-react-native";
+import * as ScreenOrientation from "expo-screen-orientation";
 import { Density, Column } from "../Table.types";
 
 interface TableToolbarProps<T> {
@@ -36,6 +45,7 @@ export function TableToolbar<T>({
   onToggleSticky,
 }: TableToolbarProps<T>) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Density döngüsü: compact -> standard -> comfortable -> compact
   const cycleDensity = () => {
@@ -45,6 +55,19 @@ export function TableToolbar<T>({
       comfortable: "compact",
     };
     onDensityChange(next[density]);
+  };
+
+  const toggleFullscreen = async () => {
+    if (isFullscreen) {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP
+      );
+    } else {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.LANDSCAPE
+      );
+    }
+    setIsFullscreen(!isFullscreen);
   };
 
   return (
@@ -63,6 +86,19 @@ export function TableToolbar<T>({
 
       {/* AKSİYON BUTONLARI */}
       <View style={styles.actions}>
+        {/* Fullscreen Toggle */}
+        <TouchableOpacity
+          onPress={toggleFullscreen}
+          style={styles.iconButton}
+          activeOpacity={0.7}
+        >
+          {isFullscreen ? (
+            <Minimize2 size={20} color="#374151" />
+          ) : (
+            <Maximize2 size={20} color="#374151" />
+          )}
+        </TouchableOpacity>
+
         {/* Density Toggle */}
         <TouchableOpacity
           onPress={cycleDensity}
@@ -87,6 +123,7 @@ export function TableToolbar<T>({
         visible={isMenuOpen}
         transparent
         animationType="fade"
+        supportedOrientations={["portrait", "landscape"]}
         onRequestClose={() => setIsMenuOpen(false)}
       >
         <View style={styles.modalOverlay}>
@@ -113,8 +150,6 @@ export function TableToolbar<T>({
                             styles.pinActive,
                         ]}
                       >
-                        {/* Pin icon from Lucide would be ideal, using Eye for now as placeholder if Pin not imported, but wait, let's try to import Pin */}
-                        {/* Re-using Eye temporarily isn't great. I will import Pin. */}
                         <Pin
                           size={18}
                           color={
@@ -150,10 +185,10 @@ export function TableToolbar<T>({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    padding: 12,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    backgroundColor: "#fff",
+    borderBottomColor: "#f3f4f6",
+    backgroundColor: "#ffffff",
     gap: 12,
     alignItems: "center",
   },
@@ -161,66 +196,81 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f9fafb",
-    borderRadius: 8,
+    backgroundColor: "#f9fafb", // Lighter background
+    borderRadius: 12, // Improved rounded corners
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    paddingHorizontal: 10,
-    height: 40,
+    borderColor: "transparent", // Cleaner look
+    paddingHorizontal: 12,
+    height: 44, // Taller touch target
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   searchIcon: {
     marginRight: 8,
+    opacity: 0.5,
   },
   input: {
     flex: 1,
     height: "100%",
     color: "#1f2937",
     fontSize: 14,
+    fontWeight: "500",
   },
   actions: {
     flexDirection: "row",
     gap: 8,
   },
   iconButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 8,
-    backgroundColor: "#f3f4f6",
+    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#f3f4f6", // Subtle border
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(17, 24, 39, 0.4)", // Darker, smoother overlay
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    width: "80%",
-    maxHeight: "60%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
+    width: "85%",
+    maxHeight: "70%",
+    backgroundColor: "#ffffff",
+    borderRadius: 24, // Much rounder
+    padding: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20, // Hero shadow
+    elevation: 10,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#f3f4f6",
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    letterSpacing: -0.5,
   },
   modalList: {
     flexGrow: 0,
@@ -229,12 +279,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#f9fafb",
   },
   switchLabel: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: "500",
     color: "#374151",
   },
   switchActions: {
@@ -243,11 +294,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   pinButton: {
-    padding: 6,
-    borderRadius: 6,
+    padding: 8,
+    borderRadius: 8,
     backgroundColor: "#f3f4f6",
   },
   pinActive: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#4f46e5", // Indigo 600
   },
 });

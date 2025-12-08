@@ -30,6 +30,7 @@
   "homepage": "https://github.com/melihmuratpesmen/expo-smart-table#readme",
   "dependencies": {
     "@shopify/flash-list": "^2.2.0",
+    "expo-screen-orientation": "^9.0.8",
     "lucide-react-native": "^0.556.0",
     "react-native-svg": "^15.15.1"
   },

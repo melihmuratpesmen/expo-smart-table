@@ -4,11 +4,11 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   Animated,
   StyleProp,
   ViewStyle,
   TextInput,
+  useWindowDimensions,
 } from "react-native";
 import { FlashList, ListRenderItemInfo } from "@shopify/flash-list";
 import {
@@ -23,7 +23,6 @@ import { TableToolbar } from "./TableToolbar";
 import { Checkbox } from "./Checkbox";
 import { ColumnFilterModal } from "./ColumnFilterModal";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
 const CHECKBOX_WIDTH = 50;
 
 const ROW_HEIGHTS: Record<Density, number> = {
@@ -34,14 +33,16 @@ const ROW_HEIGHTS: Record<Density, number> = {
 
 const COLORS = {
   white: "#ffffff",
-  headerBg: "#f9fafb",
+  headerBg: "#ffffff", // Cleaner white header
   rowEven: "#ffffff",
-  rowOdd: "#f9fafb",
-  rowSelected: "#ecfdf5",
-  border: "#e5e7eb",
-  textMain: "#374151",
-  textMuted: "#6b7280",
-  editBorder: "#10b981",
+  rowOdd: "#fafafa", // Very subtle grey
+  rowSelected: "#eff6ff", // Light indigo/blue for selection
+  border: "#f3f4f6", // Lighter, more subtle border
+  textMain: "#1f2937", // Darker gray for better contrast
+  textSecondary: "#6b7280",
+  primary: "#4f46e5", // Indigo 600
+  primaryLight: "#e0e7ff",
+  accent: "#8b5cf6", // Violet
 };
 
 export function ModernTable<T extends { id: string | number }>({
@@ -75,6 +76,7 @@ export function ModernTable<T extends { id: string | number }>({
   filters,
   onFilterChange,
 }: ModernTableProps<T>) {
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const scrollX = useRef(new Animated.Value(0)).current;
 
   // Edit Mode State
@@ -262,9 +264,9 @@ export function ModernTable<T extends { id: string | number }>({
             <Text style={styles.headerText}>{col.title}</Text>
             {isActiveSort &&
               (sortDirection === "asc" ? (
-                <ChevronUp size={16} color="#333" />
+                <ChevronUp size={16} color={COLORS.textMain} />
               ) : (
-                <ChevronDown size={16} color="#333" />
+                <ChevronDown size={16} color={COLORS.textMain} />
               ))}
           </TouchableOpacity>
 
@@ -273,7 +275,10 @@ export function ModernTable<T extends { id: string | number }>({
               style={[styles.filterIcon, isFiltered && styles.filterIconActive]}
               onPress={() => setActiveFilterColumn(col.key as string)}
             >
-              <ListFilter size={14} color={isFiltered ? "white" : "#666"} />
+              <ListFilter
+                size={14}
+                color={isFiltered ? COLORS.white : COLORS.textSecondary}
+              />
             </TouchableOpacity>
           )}
 
@@ -547,10 +552,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: "rgba(229, 231, 235, 0.5)", // Semi-transparent border
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1, // Softer shadow
+    shadowRadius: 12, // Larger spread
+    elevation: 5,
   },
   header: {
     flexDirection: "row",
@@ -562,61 +572,54 @@ const styles = StyleSheet.create({
   headerCell: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    borderRightWidth: 1,
-    borderRightColor: "#eee",
+    paddingHorizontal: 16, // More breathing room
+    borderRightWidth: 0, // Removed vertical borders for cleaner look
     height: "100%",
     justifyContent: "space-between",
-    minHeight: 48,
+    minHeight: 56, // Slightly taller header
   },
   headerContent: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
     height: "100%",
+    gap: 6,
   },
   filterIcon: {
-    padding: 4,
-    marginLeft: 4,
-    borderRadius: 4,
+    padding: 6,
+    borderRadius: 6,
+    backgroundColor: "#f3f4f6",
   },
   filterIconActive: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: COLORS.primaryLight,
   },
   cellBase: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
-    borderRightWidth: 1,
-    borderRightColor: "#f3f4f6",
-  },
-  headerBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
+    borderRightWidth: 0, // Removing vertical borders
   },
   headerText: {
-    fontWeight: "600",
-    color: COLORS.textMain,
+    fontWeight: "700",
+    color: "#374151",
     fontSize: 13,
-  },
-  sortIcon: {
-    marginLeft: 4,
+    textTransform: "uppercase", // Modern touch
+    letterSpacing: 0.5,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
+    borderBottomColor: COLORS.border,
   },
   cellText: {
     fontSize: 14,
     color: COLORS.textMain,
+    fontWeight: "500",
   },
   editableText: {
-    textDecorationLine: "underline",
-    textDecorationStyle: "dotted",
-    textDecorationColor: "#9ca3af",
+    color: COLORS.primary,
+    fontWeight: "600",
   },
   stickyCheckbox: {
     width: CHECKBOX_WIDTH,
@@ -624,22 +627,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "relative",
     zIndex: 101,
-    borderRightWidth: 1,
+    borderRightWidth: 1, // Keep border for sticky separator
     borderRightColor: COLORS.border,
     shadowColor: "#000",
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 4,
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   editInput: {
     flex: 1,
-    height: "80%",
+    height: 36,
     padding: 0,
-    borderWidth: 1,
-    borderColor: COLORS.editBorder,
-    borderRadius: 4,
-    paddingHorizontal: 8,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    borderRadius: 6,
+    paddingHorizontal: 10,
     backgroundColor: COLORS.white,
     fontSize: 14,
     color: COLORS.textMain,
@@ -648,18 +651,20 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   emptyContainer: {
-    padding: 24,
+    padding: 48,
     alignItems: "center",
-    width: SCREEN_WIDTH,
+    justifyContent: "center",
   },
   emptyText: {
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
+    fontSize: 16,
+    marginTop: 12,
   },
   paginationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 8,
+    padding: 12,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     backgroundColor: COLORS.white,
@@ -673,53 +678,64 @@ const styles = StyleSheet.create({
   paginationRight: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
   },
   perPageContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    backgroundColor: "#f9fafb",
+    padding: 4,
+    borderRadius: 8,
   },
   perPageLabel: {
     fontSize: 12,
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
+    marginLeft: 4,
   },
   perPageButtons: {
     flexDirection: "row",
-    gap: 4,
+    gap: 2,
   },
   perPageButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    backgroundColor: "#f3f4f6",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
   },
   perPageButtonActive: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: COLORS.white,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   perPageButtonText: {
     fontSize: 12,
-    color: "#374151",
+    color: COLORS.textSecondary,
   },
   perPageButtonTextActive: {
-    color: "#ffffff",
-    fontWeight: "600",
+    color: COLORS.primary,
+    fontWeight: "700",
   },
   pageInfo: {
-    fontSize: 12,
-    color: COLORS.textMuted,
+    fontSize: 13,
+    color: COLORS.textSecondary,
     fontWeight: "500",
-    marginRight: 8,
   },
   paginationButtons: {
     flexDirection: "row",
-    gap: 4,
+    gap: 8,
   },
   pageButton: {
-    padding: 4,
-    borderRadius: 4,
-    backgroundColor: "#f3f4f6",
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   disabledButton: {
-    opacity: 0.5,
+    opacity: 0.4,
+    backgroundColor: "#f9fafb",
   },
 });

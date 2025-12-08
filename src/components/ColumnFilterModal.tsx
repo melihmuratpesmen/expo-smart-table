@@ -189,6 +189,7 @@ export function ColumnFilterModal({
       visible={visible}
       transparent
       animationType="fade"
+      supportedOrientations={["portrait", "landscape"]}
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
@@ -219,7 +220,7 @@ export function ColumnFilterModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(17, 24, 39, 0.4)", // Darker, smoother overlay
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
@@ -227,36 +228,37 @@ const styles = StyleSheet.create({
   modalContent: {
     width: "90%",
     maxWidth: 400,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: "#ffffff",
+    borderRadius: 24,
+    padding: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1f2937",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
   },
   body: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   input: {
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
     fontSize: 16,
     backgroundColor: "#f9fafb",
+    color: "#1f2937",
   },
   optionsList: {
     maxHeight: 200,
@@ -265,19 +267,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 12,
+    padding: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#f3f4f6",
   },
   optionItemActive: {
-    backgroundColor: "#3b82f6",
-    borderRadius: 6,
+    backgroundColor: "#4f46e5", // Indigo
+    borderRadius: 8,
     borderBottomWidth: 0,
     marginVertical: 2,
   },
   optionText: {
     fontSize: 14,
     color: "#374151",
+    fontWeight: "500",
   },
   optionTextActive: {
     color: "white",
@@ -289,15 +292,15 @@ const styles = StyleSheet.create({
   },
   booleanButton: {
     flex: 1,
-    padding: 12,
+    padding: 14,
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    borderRadius: 8,
+    borderRadius: 12, // Rounder
     alignItems: "center",
   },
   booleanButtonActive: {
-    backgroundColor: "#3b82f6",
-    borderColor: "#3b82f6",
+    backgroundColor: "#4f46e5",
+    borderColor: "#4f46e5",
   },
   booleanText: {
     color: "#374151",
@@ -305,6 +308,7 @@ const styles = StyleSheet.create({
   },
   booleanTextActive: {
     color: "white",
+    fontWeight: "600",
   },
   rangeContainer: {
     flexDirection: "row",
@@ -314,9 +318,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rangeLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#6b7280",
-    marginBottom: 4,
+    marginBottom: 6,
+    fontWeight: "500",
   },
   footer: {
     flexDirection: "row",
@@ -325,17 +330,22 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   clearButtonText: {
     color: "#6b7280",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   applyButton: {
-    backgroundColor: "#3b82f6",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: "#4f46e5", // Indigo Match
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: "#4f46e5",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   applyButtonText: {
     color: "white",
