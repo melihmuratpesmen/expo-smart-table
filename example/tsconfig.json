@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-smart-table": ["../src/index"],
+      "expo-smart-table/*": ["../src/*"]
+    }
+  }
+}

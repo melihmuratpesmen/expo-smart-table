@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ExpoSmartTableModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.smarttable.ExpoSmartTableModule"]
+  }
+}
