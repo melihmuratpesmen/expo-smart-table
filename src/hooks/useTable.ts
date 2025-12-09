@@ -1,6 +1,6 @@
 // useTable.ts
 import { useState, useMemo, useEffect } from 'react';
-import { SortDirection, Column, Density } from '../Table.types';
+import { SortDirection, Column, Density } from '../types';
 
 export function useTable<T extends { id: string | number }>(
   data: T[],
@@ -79,7 +79,7 @@ export function useTable<T extends { id: string | number }>(
     return result;
   }, [data, searchQuery, filters, columns]);
 
-  // 2. Sort (Sıralama) - Filtrelenmiş veri üzerinden
+  // 2. Sort (Sorting) - Over filtered data
   const sortedData = useMemo(() => {
     let sortableItems = [...filteredData];
     // ...
@@ -89,7 +89,7 @@ export function useTable<T extends { id: string | number }>(
         const aValue = a[sortConfig.key];
         const bValue = b[sortConfig.key];
 
-        // Sayısal kontrol
+        // Numeric check
         const isNum = !isNaN(Number(aValue)) && !isNaN(Number(bValue));
 
         if (isNum) {
@@ -100,7 +100,7 @@ export function useTable<T extends { id: string | number }>(
           return 0;
         }
 
-        // String kontrol
+        // String check
         if (aValue < bValue) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -113,7 +113,7 @@ export function useTable<T extends { id: string | number }>(
     return sortableItems;
   }, [filteredData, sortConfig]);
 
-  // 3. Pagination (Sayfalama) - Sıralanmış veri üzerinden
+  // 3. Pagination - Over sorted data
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return sortedData.slice(startIndex, startIndex + itemsPerPage);
@@ -121,7 +121,7 @@ export function useTable<T extends { id: string | number }>(
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  // Arama yapıldığında sayfayı 1'e çek
+  // Reset to page 1 when search/filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filters]);
@@ -140,7 +140,7 @@ export function useTable<T extends { id: string | number }>(
     setFilters(prev => {
       const newFilters = { ...prev, [key]: value };
       if (value === null || value === undefined || value === '') {
-        delete newFilters[key]; // Temizle
+        delete newFilters[key]; // Clear
       }
       return newFilters;
     });

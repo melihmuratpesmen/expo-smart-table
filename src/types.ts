@@ -1,11 +1,44 @@
 // types.ts
 import { ReactNode } from 'react';
-import { StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
 import { TableTheme } from './theme/tokens';
 
 export type SortDirection = 'asc' | 'desc' | null;
 export type Density = 'compact' | 'standard' | 'comfortable';
 export type FilterType = 'text' | 'select' | 'boolean' | 'number-range';
+
+// New: Translations Interface
+export interface TableTranslations {
+  searchPlaceholder: string;
+  noData: string;
+  columns: string;
+  filter: string;
+  apply: string;
+  clear: string;
+  selected: string;
+  unknownFilter: string;
+  all: string;
+  yesActive: string;
+  noPassive: string;
+  min: string;
+  max: string;
+}
+
+export const DEFAULT_TRANSLATIONS: TableTranslations = {
+  searchPlaceholder: "Search...",
+  noData: "No data found.",
+  columns: "Columns",
+  filter: "Filter",
+  apply: "Apply Filters",
+  clear: "Clear",
+  selected: "selected",
+  unknownFilter: "Unknown filter type",
+  all: "All",
+  yesActive: "Yes / Active",
+  noPassive: "No / Passive",
+  min: "Min",
+  max: "Max",
+};
 
 export interface FilterConfig {
   type: FilterType;
@@ -45,6 +78,7 @@ export interface ModernTableProps<T> {
   // Tematik Props
   theme?: 'light' | 'dark';
   themeConfig?: Partial<TableTheme>;
+  translations?: Partial<TableTranslations>; // New Prop for localization
 
   // Yeni Props
   enableSelection?: boolean; // Checkbox aktif mi?

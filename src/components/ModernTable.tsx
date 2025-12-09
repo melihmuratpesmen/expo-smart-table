@@ -21,7 +21,12 @@ import {
   Hand, // Added Hand
   AlignJustify, // Added AlignJustify for drag handle
 } from "lucide-react-native";
-import { ModernTableProps, Column, Density } from "../Table.types";
+import {
+  ModernTableProps,
+  Column,
+  Density,
+  DEFAULT_TRANSLATIONS,
+} from "../types";
 import { TableToolbar } from "./TableToolbar";
 import { Checkbox } from "./Checkbox";
 import { ColumnFilterModal } from "./ColumnFilterModal";
@@ -48,7 +53,7 @@ export function ModernTable<T extends { id: string | number }>({
   containerStyle,
   headerStyle,
   rowStyle,
-  emptyMessage = "Veri bulunamadı.",
+  emptyMessage = "No data found.",
   // Toolbar Props
   searchQuery,
   onSearchChange,
@@ -75,9 +80,11 @@ export function ModernTable<T extends { id: string | number }>({
   // Row Drag
   enableRowReorder,
   onRowReorder,
+  translations,
 }: ModernTableProps<T>) {
   const tableTheme = useTableTheme(theme, themeConfig);
   const styles = useMemo(() => createStyles(tableTheme), [tableTheme]);
+  const t = { ...DEFAULT_TRANSLATIONS, ...translations };
 
   // Initialize column order
   const [columnOrder, setColumnOrder] = useState<string[]>(
@@ -385,9 +392,9 @@ export function ModernTable<T extends { id: string | number }>({
               onPress={() => setActiveFilterColumn(col.key as string)}
             >
               <ListFilter
-                size={14}
+                size={16}
                 color={
-                  isFiltered ? tableTheme.textInverse : tableTheme.textSecondary
+                  isFiltered ? tableTheme.primary : tableTheme.textSecondary
                 }
               />
             </TouchableOpacity>
@@ -405,6 +412,7 @@ export function ModernTable<T extends { id: string | number }>({
                 setActiveFilterColumn(null);
               }}
               theme={tableTheme}
+              translations={t}
             />
           )}
         </View>
@@ -577,6 +585,7 @@ export function ModernTable<T extends { id: string | number }>({
           selectionMode={selectionMode}
           onToggleSelectionMode={toggleSelectionMode}
           selectedCount={selectedIds?.size || 0}
+          translations={t}
         />
       )}
 

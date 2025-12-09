@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { X, Check } from "lucide-react-native";
-import { FilterConfig } from "../Table.types";
+import { FilterConfig, TableTranslations } from "../types";
 import { TableTheme } from "../theme/tokens";
 import { useTableTheme } from "../hooks/useTableTheme";
 
@@ -21,6 +21,7 @@ interface ColumnFilterModalProps {
   currentValue: any;
   onApply: (value: any) => void;
   theme?: TableTheme;
+  translations: TableTranslations;
 }
 
 export function ColumnFilterModal({
@@ -31,6 +32,7 @@ export function ColumnFilterModal({
   currentValue,
   onApply,
   theme,
+  translations,
 }: ColumnFilterModalProps) {
   const [tempValue, setTempValue] = useState<any>(currentValue);
   const tableTheme = theme || useTableTheme(); // Fallback if not provided directly
@@ -57,7 +59,8 @@ export function ColumnFilterModal({
         return (
           <TextInput
             style={styles.input}
-            placeholder="Ara..."
+            placeholder={translations.searchPlaceholder}
+            placeholderTextColor={tableTheme.textSecondary}
             value={tempValue || ""}
             onChangeText={setTempValue}
             autoFocus
@@ -77,7 +80,7 @@ export function ColumnFilterModal({
                   !tempValue && styles.optionTextActive,
                 ]}
               >
-                Tümü
+                {translations.all}
               </Text>
               {!tempValue && <Check size={16} color="white" />}
             </TouchableOpacity>
@@ -123,7 +126,7 @@ export function ColumnFilterModal({
                   tempValue === true && styles.booleanTextActive,
                 ]}
               >
-                Evet / Aktif
+                {translations.yesActive}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -139,7 +142,7 @@ export function ColumnFilterModal({
                   tempValue === false && styles.booleanTextActive,
                 ]}
               >
-                Hayır / Pasif
+                {translations.noPassive}
               </Text>
             </TouchableOpacity>
           </View>
@@ -149,7 +152,7 @@ export function ColumnFilterModal({
         return (
           <View style={styles.rangeContainer}>
             <View style={styles.rangeInputWrapper}>
-              <Text style={styles.rangeLabel}>Min</Text>
+              <Text style={styles.rangeLabel}>{translations.min}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="0"
@@ -166,7 +169,7 @@ export function ColumnFilterModal({
               />
             </View>
             <View style={styles.rangeInputWrapper}>
-              <Text style={styles.rangeLabel}>Max</Text>
+              <Text style={styles.rangeLabel}>{translations.max}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="100"
@@ -186,7 +189,7 @@ export function ColumnFilterModal({
         );
 
       default:
-        return <Text>Bilinmeyen filtre tipi</Text>;
+        return <Text>{translations.unknownFilter}</Text>;
     }
   };
 
@@ -201,7 +204,9 @@ export function ColumnFilterModal({
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
           <View style={styles.header}>
-            <Text style={styles.title}>{columnTitle} Filtrele</Text>
+            <Text style={styles.title}>
+              {translations.filter} {columnTitle}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <X size={20} color={tableTheme.textSecondary} />
             </TouchableOpacity>
@@ -211,10 +216,10 @@ export function ColumnFilterModal({
 
           <View style={styles.footer}>
             <TouchableOpacity style={styles.clearButton} onPress={cleanFilter}>
-              <Text style={styles.clearButtonText}>Temizle</Text>
+              <Text style={styles.clearButtonText}>{translations.clear}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-              <Text style={styles.applyButtonText}>Uygula</Text>
+              <Text style={styles.applyButtonText}>{translations.apply}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -343,6 +348,7 @@ const createStyles = (theme: TableTheme) =>
       color: theme.textSecondary,
       fontWeight: "600",
     },
+
     applyButton: {
       backgroundColor: theme.primary, // Indigo Match
       paddingHorizontal: 24,

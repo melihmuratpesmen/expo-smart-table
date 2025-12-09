@@ -28,25 +28,28 @@
   "author": "melihmuratpesmen <melih.pesmen@myexamy.com> (https://github.com/melihmuratpesmen)",
   "license": "MIT",
   "homepage": "https://github.com/melihmuratpesmen/expo-smart-table#readme",
-  "dependencies": {
-    "@shopify/flash-list": "^2.2.0",
-    "expo-screen-orientation": "^9.0.8",
-    "lucide-react-native": "^0.556.0",
-    "react-native-svg": "^15.15.1"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@shopify/flash-list": "^2.2.0",
     "@types/react": "~19.1.0",
     "expo": "^54.0.27",
     "expo-module-scripts": "^5.0.8",
+    "expo-screen-orientation": "^9.0.8",
+    "lucide-react-native": "^0.556.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "^2.29.1",
-    "react-native-reanimated": "^4.2.0"
+    "react-native-reanimated": "^4.2.0",
+    "react-native-svg": "^15.15.1"
   },
   "peerDependencies": {
+    "@shopify/flash-list": "*",
     "expo": "*",
+    "expo-screen-orientation": "*",
+    "lucide-react-native": "*",
     "react": "*",
     "react-native": "*",
     "react-native-gesture-handler": ">=2.0.0",
-    "react-native-reanimated": ">=3.0.0"
+    "react-native-reanimated": ">=3.0.0",
+    "react-native-svg": "*"
   }
 }

@@ -250,6 +250,22 @@ export default function App() {
               );
             }}
             containerStyle={styles.tableContainer}
+            // Localization Example (Turkish)
+            translations={{
+              searchPlaceholder: "Ara...",
+              noData: "Veri yok",
+              columns: "Sütunlar",
+              filter: "Filtrele",
+              apply: "Uygula",
+              clear: "Temizle",
+              selected: "seçildi",
+              unknownFilter: "Bilinmeyen filtre",
+              all: "Tümü",
+              yesActive: "Evet / Aktif",
+              noPassive: "Hayır / Pasif",
+              min: "Min",
+              max: "Max",
+            }}
           />
         </View>
       </SafeAreaView>

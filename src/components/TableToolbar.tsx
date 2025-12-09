@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import {
   Search,
-  SlidersHorizontal,
   Eye,
   X,
   Pin,
@@ -22,7 +21,7 @@ import {
   ArrowUpDown,
 } from "lucide-react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
-import { Density, Column } from "../Table.types";
+import { Density, Column, TableTranslations } from "../types";
 import { TableTheme } from "../theme/tokens";
 
 interface TableToolbarProps<T> {
@@ -41,6 +40,7 @@ interface TableToolbarProps<T> {
   selectionMode?: "select" | "reorder";
   onToggleSelectionMode?: () => void;
   selectedCount?: number;
+  translations: TableTranslations;
 }
 
 export function TableToolbar<T>({
@@ -58,13 +58,14 @@ export function TableToolbar<T>({
   selectionMode = "select",
   onToggleSelectionMode,
   selectedCount = 0,
+  translations,
 }: TableToolbarProps<T>) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
-  // Density döngüsü: compact -> standard -> comfortable -> compact
+  // Density cycle: compact -> standard -> comfortable -> compact
   const cycleDensity = () => {
     const next: Record<Density, Density> = {
       compact: "standard",
@@ -89,8 +90,7 @@ export function TableToolbar<T>({
 
   return (
     <View style={styles.container}>
-      {/* ARAMA ÇUBUĞU */}
-      {/* ARAMA ÇUBUĞU */}
+      {/* SEARCH BAR */}
       <View style={styles.searchContainer}>
         {selectedCount > 0 ? (
           <View style={styles.selectionBadge}>
@@ -105,14 +105,18 @@ export function TableToolbar<T>({
         )}
         <TextInput
           style={styles.input}
-          placeholder={selectedCount > 0 ? "seçildi" : "Ara..."}
+          placeholder={
+            selectedCount > 0
+              ? translations.selected
+              : translations.searchPlaceholder
+          }
           placeholderTextColor={theme.textSecondary}
           value={searchQuery}
           onChangeText={onSearchChange}
         />
       </View>
 
-      {/* AKSİYON BUTONLARI */}
+      {/* ACTION BUTTONS */}
       <View style={styles.actions}>
         {/* Fullscreen Toggle */}
         <TouchableOpacity
@@ -164,7 +168,7 @@ export function TableToolbar<T>({
         </TouchableOpacity>
       </View>
 
-      {/* SÜTUN GİZLEME MODALI */}
+      {/* COLUMN VISIBILITY MODAL */}
       <Modal
         visible={isMenuOpen}
         transparent
@@ -175,7 +179,7 @@ export function TableToolbar<T>({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Sütun Görünümü</Text>
+              <Text style={styles.modalTitle}>{translations.columns}</Text>
               <TouchableOpacity onPress={() => setIsMenuOpen(false)}>
                 <X size={24} color={theme.text} />
               </TouchableOpacity>
