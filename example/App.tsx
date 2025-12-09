@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  useWindowDimensions,
+  TouchableOpacity,
+} from "react-native";
 import { ModernTable, useTable, Column } from "expo-smart-table";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -26,6 +32,9 @@ const MOCK_DATA: User[] = Array.from({ length: 50 }, (_, i) => ({
 }));
 
 export default function App() {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
   const columns: Column<User>[] = [
     {
       key: "id",
@@ -61,7 +70,7 @@ export default function App() {
     {
       key: "status",
       title: "Status",
-      width: 100,
+      width: 120,
       filterConfig: { type: "select", options: ["active", "inactive"] },
       renderCell: (item) => (
         <View
@@ -111,12 +120,67 @@ export default function App() {
     setColumnFilter,
   } = useTable(MOCK_DATA, columns, 10);
 
+  // Theme State
+  const [theme, setTheme] = React.useState<"light" | "dark">("light");
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>Expo Smart Table</Text>
+    <SafeAreaView
+      style={[
+        styles.container,
+        theme === "dark" && { backgroundColor: "#111827" },
+      ]}
+      edges={["top", "left", "right"]}
+    >
+      <View
+        style={[
+          styles.contentContainer,
+          {
+            paddingHorizontal: isLandscape ? 0 : 16,
+            paddingTop: 24,
+            paddingBottom: 0,
+          },
+        ]}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 16,
+            paddingHorizontal: isLandscape ? 16 : 0,
+          }}
+        >
+          <Text
+            style={[
+              styles.title,
+              theme === "dark" && { color: "#f9fafb" },
+              { marginBottom: 0 },
+            ]}
+          >
+            Expo Smart Table
+          </Text>
+          <TouchableOpacity
+            style={{
+              padding: 8,
+              backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
+              borderRadius: 8,
+            }}
+            onPress={() => setTheme(theme === "light" ? "dark" : "light")}
+          >
+            <Text
+              style={{
+                fontWeight: "600",
+                color: theme === "dark" ? "#f9fafb" : "#1f2937",
+              }}
+            >
+              {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <ModernTable
+          key={theme} // Force re-render on theme change
+          theme={theme}
           data={paginatedData}
           columns={columns}
           filters={filters}

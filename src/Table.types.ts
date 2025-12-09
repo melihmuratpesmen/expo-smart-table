@@ -1,6 +1,7 @@
 // types.ts
 import { ReactNode } from 'react';
 import { StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { TableTheme } from './theme/tokens';
 
 export type SortDirection = 'asc' | 'desc' | null;
 export type Density = 'compact' | 'standard' | 'comfortable';
@@ -40,6 +41,10 @@ export interface ModernTableProps<T> {
   data: T[];
   columns: Column<T>[];
   stickyHeader?: boolean;
+
+  // Tematik Props
+  theme?: 'light' | 'dark';
+  themeConfig?: Partial<TableTheme>;
 
   // Yeni Props
   enableSelection?: boolean; // Checkbox aktif mi?

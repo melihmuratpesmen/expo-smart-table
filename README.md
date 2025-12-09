@@ -23,13 +23,28 @@ npm install expo-smart-table
 
 ### Configure for Android
 
-
-
-
 ### Configure for iOS
 
 Run `npx pod-install` after installing the npm package.
 
 # Contributing
 
-Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
+Contributions are very welcome! Please refer to guidelines described in the [contributing guide](https://github.com/expo/expo#contributing).
+
+### NEXT STEP
+
+- [x] Theme Support (Tema Desteği):
+
+Kullanıcının style prop'larıyla uğraşmadan tek bir ayarla Dark Mode/Light Mode geçişi yapabilmesi.
+
+- [ ] Skeleton Loading (İskelet Yükleme):
+
+Veri sunucudan gelirken dönen sıkıcı bir "spinner" yerine, tablonun gri gölgeli bir iskeletinin görünmesi. Modern UI hissi için şart.
+
+- [ ] Drag & Drop Columns (Sürükle Bırak Sütunlar):
+
+Kullanıcının parmağıyla basılı tutup sütunların yerini değiştirebilmesi. (Bu teknik olarak zordur ama kütüphaneye büyük prestij katar - Reanimated kütüphanesi ile yapılabilir).
+
+- [ ] Data Export (Dışa Aktarma):
+
+Tek bir prop veya metod ile tablodaki veriyi .csv, .xlsx veya .pdf olarak paylaşabilme özelliği. (İş dünyası uygulamaları için harika bir özellik).

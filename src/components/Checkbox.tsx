@@ -7,16 +7,26 @@ interface CheckboxProps {
   checked: boolean;
   indeterminate?: boolean; // Tümü seçili değil ama bazıları seçiliyse (Tire işareti)
   onPress: () => void;
+  activeColor?: string;
+  borderColor?: string;
 }
 
-export function Checkbox({ checked, indeterminate, onPress }: CheckboxProps) {
+export function Checkbox({
+  checked,
+  indeterminate,
+  onPress,
+  activeColor = "#4f46e5",
+  borderColor = "#cbd5e1",
+}: CheckboxProps) {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
       style={[
         styles.container,
-        checked || indeterminate ? styles.active : styles.inactive,
+        checked || indeterminate
+          ? { backgroundColor: activeColor, borderColor: activeColor }
+          : { backgroundColor: "transparent", borderColor: borderColor },
       ]}
     >
       {indeterminate ? (
@@ -38,11 +48,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   active: {
-    backgroundColor: "#4f46e5", // INDIGO-600 (Matching ModernTable)
-    borderColor: "#4f46e5",
+    // backgroundColor and borderColor handled inline for dynamic support
   },
   inactive: {
     backgroundColor: "#ffffff",
-    borderColor: "#cbd5e1", // Slate-300
+    // borderColor handled inline
   },
 });
