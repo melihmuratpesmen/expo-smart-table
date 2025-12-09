@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { ModernTable, useTable, Column } from "expo-smart-table";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Mock Data Type
 interface User {
@@ -95,6 +96,9 @@ export default function App() {
     { key: "lastLogin", title: "Last Login", width: 120, align: "right" },
   ];
 
+  // State for data to allow reordering
+  const [data, setData] = React.useState(MOCK_DATA);
+
   const {
     paginatedData,
     totalPages,
@@ -118,110 +122,138 @@ export default function App() {
     setItemsPerPage,
     filters,
     setColumnFilter,
-  } = useTable(MOCK_DATA, columns, 10);
+  } = useTable(data, columns, 10);
 
   // Theme State
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
 
   return (
-    <SafeAreaView
-      style={[
-        styles.container,
-        theme === "dark" && { backgroundColor: "#111827" },
-      ]}
-      edges={["top", "left", "right"]}
-    >
-      <View
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView
         style={[
-          styles.contentContainer,
-          {
-            paddingHorizontal: isLandscape ? 0 : 16,
-            paddingTop: 24,
-            paddingBottom: 0,
-          },
+          styles.container,
+          theme === "dark" && { backgroundColor: "#111827" },
         ]}
+        edges={["top", "left", "right"]}
       >
         <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 16,
-            paddingHorizontal: isLandscape ? 16 : 0,
-          }}
+          style={[
+            styles.contentContainer,
+            {
+              paddingHorizontal: isLandscape ? 0 : 16,
+              paddingTop: 0,
+              paddingBottom: 0,
+            },
+          ]}
         >
-          <Text
-            style={[
-              styles.title,
-              theme === "dark" && { color: "#f9fafb" },
-              { marginBottom: 0 },
-            ]}
-          >
-            Expo Smart Table
-          </Text>
-          <TouchableOpacity
+          {/* Header & Toggle omitted for brevity, keeping existing structure */}
+          <View
             style={{
-              padding: 8,
-              backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
-              borderRadius: 8,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 16,
+              paddingHorizontal: isLandscape ? 16 : 0,
             }}
-            onPress={() => setTheme(theme === "light" ? "dark" : "light")}
           >
             <Text
-              style={{
-                fontWeight: "600",
-                color: theme === "dark" ? "#f9fafb" : "#1f2937",
-              }}
+              style={[
+                styles.title,
+                theme === "dark" && { color: "#f9fafb" },
+                { marginBottom: 0 },
+              ]}
             >
-              {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+              Expo Smart Table
             </Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={{
+                padding: 8,
+                backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
+                borderRadius: 8,
+              }}
+              onPress={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              <Text
+                style={{
+                  fontWeight: "600",
+                  color: theme === "dark" ? "#f9fafb" : "#1f2937",
+                }}
+              >
+                {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-        <ModernTable
-          key={theme} // Force re-render on theme change
-          theme={theme}
-          data={paginatedData}
-          columns={columns}
-          filters={filters}
-          onFilterChange={setColumnFilter}
-          // Sorting
-          onSort={handleSort}
-          sortColumn={sortConfig.key as keyof User}
-          sortDirection={sortConfig.direction}
-          // Pagination
-          pagination={{
-            currentPage,
-            totalPages,
-            itemsPerPage,
-            onPageChange: setCurrentPage,
-            itemsPerPageOptions: [5, 10, 20, 50],
-            onItemsPerPageChange: setItemsPerPage,
-          }}
-          // Toolbar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          density={density}
-          onDensityChange={setDensity}
-          visibleColumns={visibleColumns}
-          onToggleColumn={toggleColumnVisibility}
-          stickyColumns={stickyColumns}
-          onToggleSticky={toggleStickyColumn}
-          // Selection
-          enableSelection
-          selectedIds={selectedIds}
-          onToggleOne={toggleSelection}
-          onToggleAll={toggleAllSelection}
-          isAllSelected={isAllSelected}
-          // Editing
-          onRowChange={(newItem) => {
-            console.log("Updated Item:", newItem);
-            // In a real app, you would update your state here
-          }}
-          containerStyle={styles.tableContainer}
-        />
-      </View>
-    </SafeAreaView>
+          <ModernTable
+            key={theme} // Force re-render on theme change
+            theme={theme}
+            data={paginatedData}
+            columns={columns}
+            filters={filters}
+            onFilterChange={setColumnFilter}
+            // Sorting
+            onSort={handleSort}
+            sortColumn={sortConfig.key as keyof User}
+            sortDirection={sortConfig.direction}
+            // Pagination
+            pagination={{
+              currentPage,
+              totalPages,
+              itemsPerPage,
+              onPageChange: setCurrentPage,
+              itemsPerPageOptions: [5, 10, 20, 50],
+              onItemsPerPageChange: setItemsPerPage,
+            }}
+            // Toolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            density={density}
+            onDensityChange={setDensity}
+            visibleColumns={visibleColumns}
+            onToggleColumn={toggleColumnVisibility}
+            stickyColumns={stickyColumns}
+            onToggleSticky={toggleStickyColumn}
+            // Drag & Drop
+            onColumnReorder={(newOrder) => {
+              console.log("New Column Order:", newOrder);
+            }}
+            // Row Reorder
+            enableRowReorder
+            onRowReorder={(from, to) => {
+              console.log(`Row Reorder: ${from} -> ${to}`);
+
+              const globalFrom = (currentPage - 1) * itemsPerPage + from;
+              const globalTo = (currentPage - 1) * itemsPerPage + to;
+
+              // Ensure bounds safely
+              if (globalTo < 0 || globalTo >= data.length) return;
+
+              const newData = [...data];
+              const [moved] = newData.splice(globalFrom, 1);
+              newData.splice(globalTo, 0, moved);
+
+              setData(newData);
+            }}
+            // Selection
+            enableSelection
+            selectedIds={selectedIds}
+            onToggleOne={toggleSelection}
+            onToggleAll={toggleAllSelection}
+            isAllSelected={isAllSelected}
+            // Editing
+            onRowChange={(newItem) => {
+              console.log("Updated Item:", newItem);
+              setData((prevData) =>
+                prevData.map((item) =>
+                  item.id === newItem.id ? newItem : item
+                )
+              );
+            }}
+            containerStyle={styles.tableContainer}
+          />
+        </View>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 

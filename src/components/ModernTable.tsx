@@ -10,6 +10,7 @@ import {
   TextInput,
   useWindowDimensions,
 } from "react-native";
+import { GestureDetector } from "react-native-gesture-handler";
 import { FlashList, ListRenderItemInfo } from "@shopify/flash-list";
 import {
   ChevronUp,
@@ -17,6 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ListFilter,
+  Hand, // Added Hand
+  AlignJustify, // Added AlignJustify for drag handle
 } from "lucide-react-native";
 import { ModernTableProps, Column, Density } from "../Table.types";
 import { TableToolbar } from "./TableToolbar";
@@ -24,6 +27,8 @@ import { Checkbox } from "./Checkbox";
 import { ColumnFilterModal } from "./ColumnFilterModal";
 import { useTableTheme } from "../hooks/useTableTheme";
 import { TableTheme } from "../theme/tokens";
+import { DraggableHeader } from "./DraggableHeader";
+import { DraggableRow } from "./DraggableRow";
 
 const CHECKBOX_WIDTH = 50;
 
@@ -66,9 +71,48 @@ export function ModernTable<T extends { id: string | number }>({
   // Theme Props
   theme = "light",
   themeConfig,
+  onColumnReorder,
+  // Row Drag
+  enableRowReorder,
+  onRowReorder,
 }: ModernTableProps<T>) {
   const tableTheme = useTableTheme(theme, themeConfig);
   const styles = useMemo(() => createStyles(tableTheme), [tableTheme]);
+
+  // Initialize column order
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((c) => c.key as string)
+  );
+
+  // Sync column order if columns prop changes significantly
+  React.useEffect(() => {
+    if (columns.length !== columnOrder.length) {
+      setColumnOrder(columns.map((c) => c.key as string));
+    }
+  }, [columns.length]);
+
+  const [selectionMode, setSelectionMode] = useState<"select" | "reorder">(
+    "select"
+  );
+
+  const toggleSelectionMode = () => {
+    setSelectionMode((prev) => (prev === "select" ? "reorder" : "select"));
+  };
+
+  const handleColumnReorder = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+
+    // Create new order
+    const newOrder = [...columnOrder];
+    const [movedItem] = newOrder.splice(fromIndex, 1);
+
+    // Clamp toIndex
+    const targetIndex = Math.max(0, Math.min(newOrder.length, toIndex));
+    newOrder.splice(targetIndex, 0, movedItem);
+
+    setColumnOrder(newOrder);
+    onColumnReorder?.(newOrder);
+  };
 
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -85,9 +129,20 @@ export function ModernTable<T extends { id: string | number }>({
   );
 
   // 1. Prepare Active Columns
-  const activeColumns = visibleColumns
-    ? columns.filter((col) => visibleColumns.includes(col.key as string))
-    : columns;
+  // 1. Prepare Active Columns based on Order
+  const activeColumns = useMemo(() => {
+    // Filter visible columns first
+    const visibleCols = columns.filter((col) =>
+      visibleColumns ? visibleColumns.includes(col.key as string) : true
+    );
+
+    // Sort according to columnOrder
+    return visibleCols.sort(
+      (a, b) =>
+        columnOrder.indexOf(a.key as string) -
+        columnOrder.indexOf(b.key as string)
+    );
+  }, [columns, visibleColumns, columnOrder]);
 
   // 2. Pre-calculate Offsets (Memoized)
   const columnsWithOffsets = useMemo(() => {
@@ -184,9 +239,62 @@ export function ModernTable<T extends { id: string | number }>({
   const renderCheckboxColumn = (
     type: "header" | "row",
     item?: T,
-    bgColor: string = tableTheme.background
+    bgColor: string = tableTheme.background,
+    dragGesture?: any // Using any to avoid complex type import issues for now, or use ReturnType if imported
   ) => {
     const isHeader = type === "header";
+
+    // If in Reorder mode, render nothing in Header, or a placeholder
+    // In Row, render Drag Handle
+    if (selectionMode === "reorder") {
+      if (isHeader) {
+        return (
+          <View
+            style={[
+              styles.stickyCheckbox,
+              { height: currentRowHeight, backgroundColor: bgColor },
+            ]}
+          >
+            <Hand size={20} color={tableTheme.textSecondary} />
+          </View>
+        );
+      }
+
+      const DragHandle = (
+        <View style={{ opacity: 0.5 }}>
+          <AlignJustify size={20} color={tableTheme.text} />
+        </View>
+      );
+
+      return (
+        <Animated.View
+          style={[
+            styles.stickyCheckbox,
+            {
+              height: currentRowHeight,
+              backgroundColor: bgColor,
+              transform: [
+                {
+                  translateX: scrollX.interpolate({
+                    inputRange: [-1, 0, 1],
+                    outputRange: [0, 0, 1],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          {/* Visual Only - Drag logic is on the row wrapper */}
+          {dragGesture ? (
+            <GestureDetector gesture={dragGesture}>
+              {DragHandle}
+            </GestureDetector>
+          ) : (
+            DragHandle
+          )}
+        </Animated.View>
+      );
+    }
 
     return (
       <Animated.View
@@ -237,12 +345,14 @@ export function ModernTable<T extends { id: string | number }>({
       const isSortable = !!onSort;
       const isActiveSort = sortColumn === col.key;
       const isFiltered = filters && filters[col.key as string] !== undefined;
+      const isSticky =
+        col.isSticky ||
+        (stickyColumns && stickyColumns.includes(col.key as string));
 
-      return (
-        <Animated.View
-          key={col.key as string}
+      const headerContent = (
+        <View
           style={[
-            styles.headerCell,
+            styles.headerCell, // Inner style for the content
             { width: col.width || 100 },
             col.align && {
               justifyContent:
@@ -252,7 +362,6 @@ export function ModernTable<T extends { id: string | number }>({
                     ? "center"
                     : "flex-start",
             },
-            stickyStyle,
             headerStyle,
           ]}
         >
@@ -298,6 +407,38 @@ export function ModernTable<T extends { id: string | number }>({
               theme={tableTheme}
             />
           )}
+        </View>
+      );
+
+      // Wrap in DraggableHeader if not sticky
+      if (!isSticky) {
+        return (
+          <DraggableHeader
+            key={col.key as string}
+            width={col.width || 100}
+            height={currentRowHeight}
+            index={index}
+            columnKey={col.key as string}
+            title={col.title}
+            theme={tableTheme}
+            onReorder={handleColumnReorder}
+          >
+            {headerContent}
+          </DraggableHeader>
+        );
+      }
+
+      // Static render for sticky or if logic prevents drag
+      return (
+        <Animated.View
+          key={col.key as string}
+          style={[
+            styles.headerCellContainer, // Container style
+            { width: col.width || 100 },
+            stickyStyle,
+          ]}
+        >
+          {headerContent}
         </Animated.View>
       );
     },
@@ -309,6 +450,8 @@ export function ModernTable<T extends { id: string | number }>({
       filters,
       activeFilterColumn,
       onFilterChange,
+      columnOrder, // Re-render if order changes
+      tableTheme,
     ]
   );
 
@@ -321,7 +464,7 @@ export function ModernTable<T extends { id: string | number }>({
         ? tableTheme.rowEven
         : tableTheme.rowOdd;
 
-    return (
+    const renderRowContent = (dragGesture?: any) => (
       <View
         style={[
           styles.row,
@@ -329,7 +472,8 @@ export function ModernTable<T extends { id: string | number }>({
           rowStyle,
         ]}
       >
-        {enableSelection && renderCheckboxColumn("row", item, rowBgColor)}
+        {enableSelection &&
+          renderCheckboxColumn("row", item, rowBgColor, dragGesture)}
 
         {columnsWithOffsets.map((col, colIndex) => {
           const stickyStyle = getStickyStyle(col, colIndex, rowBgColor);
@@ -394,6 +538,23 @@ export function ModernTable<T extends { id: string | number }>({
         })}
       </View>
     );
+
+    if (selectionMode === "reorder") {
+      return (
+        <DraggableRow
+          key={String(item.id)}
+          index={index}
+          rowHeight={currentRowHeight}
+          theme={tableTheme}
+          isDragEnabled={true}
+          onReorder={(from, to) => onRowReorder?.(from, to)}
+        >
+          {({ dragGesture }) => renderRowContent(dragGesture)}
+        </DraggableRow>
+      );
+    }
+
+    return renderRowContent();
   };
 
   const showToolbar = !!(onSearchChange && onDensityChange && onToggleColumn);
@@ -412,6 +573,10 @@ export function ModernTable<T extends { id: string | number }>({
           stickyColumns={stickyColumns}
           onToggleSticky={onToggleSticky}
           theme={tableTheme}
+          enableRowReorder={enableRowReorder}
+          selectionMode={selectionMode}
+          onToggleSelectionMode={toggleSelectionMode}
+          selectedCount={selectedIds?.size || 0}
         />
       )}
 
@@ -558,8 +723,8 @@ export function ModernTable<T extends { id: string | number }>({
   );
 }
 
-const createStyles = (theme: TableTheme) =>
-  StyleSheet.create({
+function createStyles(theme: TableTheme) {
+  return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.background,
@@ -580,6 +745,11 @@ const createStyles = (theme: TableTheme) =>
       borderBottomColor: theme.border,
       alignItems: "center",
     },
+    headerCellContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      height: "100%",
+    },
     headerCell: {
       flexDirection: "row",
       alignItems: "center",
@@ -587,7 +757,6 @@ const createStyles = (theme: TableTheme) =>
       borderRightWidth: 0, // Removed vertical borders for cleaner look
       height: "100%",
       justifyContent: "space-between",
-      minHeight: 56, // Slightly taller header
     },
     headerContent: {
       flexDirection: "row",
@@ -750,3 +919,4 @@ const createStyles = (theme: TableTheme) =>
       backgroundColor: theme.surfaceHighlight,
     },
   });
+}

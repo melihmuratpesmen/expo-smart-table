@@ -18,6 +18,8 @@ import {
   Maximize2,
   Minimize2,
   Scaling,
+  ListChecks,
+  ArrowUpDown,
 } from "lucide-react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { Density, Column } from "../Table.types";
@@ -34,6 +36,11 @@ interface TableToolbarProps<T> {
   stickyColumns?: string[];
   onToggleSticky?: (key: string) => void;
   theme: TableTheme;
+  // Row Drag Mode
+  enableRowReorder?: boolean;
+  selectionMode?: "select" | "reorder";
+  onToggleSelectionMode?: () => void;
+  selectedCount?: number;
 }
 
 export function TableToolbar<T>({
@@ -47,6 +54,10 @@ export function TableToolbar<T>({
   stickyColumns,
   onToggleSticky,
   theme,
+  enableRowReorder,
+  selectionMode = "select",
+  onToggleSelectionMode,
+  selectedCount = 0,
 }: TableToolbarProps<T>) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -79,15 +90,22 @@ export function TableToolbar<T>({
   return (
     <View style={styles.container}>
       {/* ARAMA ÇUBUĞU */}
+      {/* ARAMA ÇUBUĞU */}
       <View style={styles.searchContainer}>
-        <Search
-          size={20}
-          color={theme.textSecondary}
-          style={styles.searchIcon}
-        />
+        {selectedCount > 0 ? (
+          <View style={styles.selectionBadge}>
+            <Text style={styles.selectionText}>{selectedCount}</Text>
+          </View>
+        ) : (
+          <Search
+            size={20}
+            color={theme.textSecondary}
+            style={styles.searchIcon}
+          />
+        )}
         <TextInput
           style={styles.input}
-          placeholder="Ara..."
+          placeholder={selectedCount > 0 ? "seçildi" : "Ara..."}
           placeholderTextColor={theme.textSecondary}
           value={searchQuery}
           onChangeText={onSearchChange}
@@ -108,6 +126,24 @@ export function TableToolbar<T>({
             <Maximize2 size={20} color={theme.text} />
           )}
         </TouchableOpacity>
+
+        {/* Row Reorder Toggle */}
+        {enableRowReorder && onToggleSelectionMode && (
+          <TouchableOpacity
+            onPress={onToggleSelectionMode}
+            style={[
+              styles.iconButton,
+              selectionMode === "reorder" && styles.activeModeButton,
+            ]}
+            activeOpacity={0.7}
+          >
+            {selectionMode === "select" ? (
+              <ListChecks size={20} color={theme.text} />
+            ) : (
+              <ArrowUpDown size={20} color={theme.primary} />
+            )}
+          </TouchableOpacity>
+        )}
 
         {/* Density Toggle */}
         <TouchableOpacity
@@ -252,6 +288,10 @@ const createStyles = (theme: TableTheme) =>
       shadowRadius: 4,
       elevation: 2,
     },
+    activeModeButton: {
+      borderColor: theme.primary,
+      backgroundColor: theme.surfaceHighlight,
+    },
     // Modal Styles
     modalOverlay: {
       flex: 1,
@@ -314,5 +354,17 @@ const createStyles = (theme: TableTheme) =>
     },
     pinActive: {
       backgroundColor: theme.primary, // Indigo 600
+    },
+    selectionBadge: {
+      backgroundColor: theme.primary,
+      borderRadius: 12,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      marginRight: 8,
+    },
+    selectionText: {
+      color: theme.textInverse,
+      fontSize: 12,
+      fontWeight: "bold",
     },
   });

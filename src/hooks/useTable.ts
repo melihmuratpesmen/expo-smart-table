@@ -181,6 +181,7 @@ export function useTable<T extends { id: string | number }>(
     }
   };
 
+
   return {
     // Data
     paginatedData,

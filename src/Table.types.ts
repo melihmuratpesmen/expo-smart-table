@@ -71,6 +71,11 @@ export interface ModernTableProps<T> {
   filters?: FilterState;
   onFilterChange?: (columnKey: string, value: any) => void;
 
+  // Drag & Drop
+  onColumnReorder?: (newOrder: string[]) => void;
+  enableRowReorder?: boolean;
+  onRowReorder?: (fromIndex: number, toIndex: number) => void;
+
   // Selection Actions
   selectedIds?: Set<string | number>;
   isAllSelected?: boolean;
